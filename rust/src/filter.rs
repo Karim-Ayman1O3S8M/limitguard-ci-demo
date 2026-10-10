@@ -20,11 +20,8 @@ pub fn average(f: &Filter) -> u16 {
     (sum / u32::from(f.count)) as u16
 }
 
-/// Index-based variant kept for the clippy walkthrough.
+/// Iterator-based variant kept for the clippy walkthrough.
 pub fn average_indexed(f: &Filter) -> u16 {
-    let mut sum: u32 = 0;
-    for i in 0..f.window.len() {
-        sum += u32::from(f.window[i]);
-    }
+    let sum: u32 = f.window.iter().map(|&s| u32::from(s)).sum();
     (sum / WINDOW as u32) as u16
 }

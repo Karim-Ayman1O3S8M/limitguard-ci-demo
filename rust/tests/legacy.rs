@@ -49,3 +49,42 @@ fn telemetry_formats_valid_reading() {
     let line = format_telemetry(&reading(412, 50), false);
     assert_eq!(line, Some("{\"kpa\":412,\"tripped\":false}".to_string()));
 }
+
+// Stage 2: gap-closing tests (they pass while FC-2 is still present).
+use limitguard::filter::average_indexed;
+use limitguard::protect::snapshot_reading;
+
+#[test]
+fn invalid_reading_is_classified_invalid() {
+    let r = Reading { value_kpa: 400, valid: false, age_ms: 50 };
+    assert_eq!(classify(&r), Zone::Invalid);
+}
+
+#[test]
+fn over_limit_reading_is_classified_over_limit() {
+    assert_eq!(classify(&reading(850, 50)), Zone::OverLimit);
+}
+
+#[test]
+fn average_of_empty_filter_is_zero() {
+    let f = Filter { window: [0; WINDOW], count: 0 };
+    assert_eq!(average(&f), 0);
+}
+
+#[test]
+fn average_indexed_matches_average() {
+    let f = Filter { window: [100, 200, 300, 400, 100, 200, 300, 400], count: 8 };
+    assert_eq!(average_indexed(&f), 250);
+}
+
+#[test]
+fn snapshot_copies_the_reading() {
+    let r = reading(412, 50);
+    assert_eq!(snapshot_reading(&r), r);
+}
+
+#[test]
+fn telemetry_of_invalid_reading_is_none() {
+    let r = Reading { value_kpa: 400, valid: false, age_ms: 50 };
+    assert_eq!(format_telemetry(&r, false), None);
+}

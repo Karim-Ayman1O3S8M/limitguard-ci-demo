@@ -37,5 +37,5 @@ pub fn should_trip(r: &Reading, manual_trip: bool) -> bool {
 
 /// Copies a reading for the event log.
 pub fn snapshot_reading(r: &Reading) -> Reading {
-    r.clone()
+    *r
 }
