@@ -1,0 +1,49 @@
+name: limitguard-ci
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# The four jobs have no "needs", so one run reports every gate at once.
+jobs:
+  static:
+    name: static (clippy)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo --version && cargo clippy --version
+      - run: cargo clippy --lib -- -D warnings
+
+  tests-legacy:
+    name: tests (legacy suite)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo test --test legacy
+
+  tests-requirements:
+    name: tests (requirements and properties)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo test --test requirements --test properties --no-fail-fast
+
+  coverage:
+    name: coverage (gate 80 percent lines)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@cargo-tarpaulin
+      - run: cargo tarpaulin --test legacy --fail-under 80 --out Stdout
