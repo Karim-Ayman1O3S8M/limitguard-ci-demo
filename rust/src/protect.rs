@@ -31,8 +31,8 @@ pub fn classify(r: &Reading) -> Zone {
 pub fn should_trip(r: &Reading, manual_trip: bool) -> bool {
     let fresh = r.age_ms <= MAX_AGE_MS;
     let over = r.value_kpa >= TRIP_LIMIT_KPA;
-    // FC-2: r.valid is never consulted, so REQ-04 is not implemented.
-    (fresh && over) || manual_trip
+    // REQ-04: an invalid reading never trips automatically.
+    (r.valid && fresh && over) || manual_trip
 }
 
 /// Copies a reading for the event log.
